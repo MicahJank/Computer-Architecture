@@ -75,4 +75,21 @@ class CPU:
         operand_a = self.ram_read(self.pc + 1)
         operand_b = self.ram_read(self.pc + 2)
 
+        # how much should the pc increment by
+        # always defaults to 1
+        pc_increment = 1
+
+        # format of opcode is AABCDDDD
+        # AA - Number of operands for this opcode, 0-2
+        # B - 1 if this is an ALU operation
+        # C - 1 if this instruction sets the PC
+        # DDDD - Instruction identifier
         
+        # first checking for an LDI operation - according to readme
+        # this should set the given position to the given number
+        if IR == 0b10000010:
+            self.reg[operand_a] = operand_b
+            pc_increment = pc_increment + 2
+
+
+
