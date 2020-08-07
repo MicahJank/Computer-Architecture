@@ -10,6 +10,27 @@ class CPU:
         self.pc = 0
         self.ram = [0x00] * 0xFF
         self.reg = [0] * 8
+        self.branchtable = {
+            0b00000001: self.HLT,
+            0b10000010: self.LDI,
+            0b01000111: self.PRN,
+            0b10100010: self.MUL
+        }
+    
+    def HLT(self):
+        sys.exit()
+
+    def LDI(self):
+        operand_a = self.ram_read(self.pc + 1)
+        operand_b = self.ram_read(self.pc + 2)
+        self.reg[operand_a] = operand_b
+    
+    def PRN(self):
+        operand_a = self.ram_read(self.pc + 1)
+        print(self.reg[operand_a])
+
+    def MUL(self, register_a, register_b):
+        self.reg[register_a] = self.reg[register_a] * self.reg[register_b]
 
     def ram_read(self, address):
         return self.ram[address]
@@ -18,35 +39,43 @@ class CPU:
         self.ram[address] = value
 
 
+    # lets us programatically load the commands in from another file
     def load(self):
         """Load a program into memory."""
 
         address = 0
 
-        # For now, we've just hardcoded a program:
+        if len(sys.argv) < 2:
+            print("No path to file given.")
+            print("e.g - filename path/to/file")
+            sys.exit()
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        try:
+            with open(sys.argv[1]) as file:
+                for line in file:
+                    comment_split = line.split('#')
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+                    possible_num = comment_split[0]
+
+                    if possible_num == '':
+                        continue
+                
+                    if possible_num[0] == "1" or possible_num[0] == "0":
+                        num = possible_num[:8]
+                        self.ram[address] = int(num, 2)
+                        address += 1
+        except FileNotFoundError:
+            print(f'{sys.argv[0]}: {sys.argv[1]} not found')
 
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
-        if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
+        try:
+            self.branchtable[op](reg_a, reg_b)
+        # if op == "ADD":
+        #     self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
-        else:
+        except:
             raise Exception("Unsupported ALU operation")
 
     def trace(self):
@@ -147,28 +176,24 @@ class CPU:
         # C - 1 if this instruction sets the PC
         # DDDD - Instruction identifier
         
-        for instruction in self.ram:
+
+        while self.pc <= len(self.ram):
             IR = self.ram[self.pc]
-            command = self.decodeInstruction(IR)
+            num_of_ops = IR >> 6
+            is_alu_op = IR >> 5 & 0b001 # if 0 false if 1 true
+            pc_set = IR >> 4 & 0b0001 # 1 if instruction sets pc 0 if it doesnt
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-            # how much should the pc increment by
-            # always defaults to 1
-            pc_increment = 1
 
-            # first checking for an LDI operation - according to readme
-            # this should set the given position to the given number
-            if command == 'LDI':
-                self.reg[operand_a] = operand_b
-                pc_increment = pc_increment + 2
-            elif command == 'PRN': # <- PRN
-                print(self.reg[operand_a])
-                pc_increment = pc_increment + 1
-            elif command == 'HLT': #<- HLT
-                sys.exit()
-            
-            # update the pc so we can get the next set of instructions
-            self.pc += pc_increment
+            # if the operation is an alu operation we should handle it there
+            # otherwise we can use the branchtable directly from here
+            if is_alu_op:
+                self.alu(IR, operand_a, operand_b)
+            else:
+                self.branchtable[IR]()
+
+            # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
+            self.pc += 1 + num_of_ops
 
 
 
