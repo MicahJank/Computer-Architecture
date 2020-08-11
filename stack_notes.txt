@@ -19,6 +19,8 @@ Why doesn't the CPU prevent stack overflows?
 - We don't want to take the time
 It's the job of the assembly programmer or compiler developer to prevent stack overflows
 Stack underflow!!
+
+
 self.ram = [None] * 256
 FF: 00
 FE: 00
@@ -53,12 +55,17 @@ R1: 00
 R2: 99
 R3: 42
 R7: F5
+
+
 PUSH
 1. Decrement the SP
 2. Get the value from the register specified, and put that value on the stack
+
+
 POP
 1. Copy value from last position of stack into the register specified
 2. Increment the SP
+
 700: 0  (a)
 699: 3  (n)
 698: 2   (a)
@@ -70,6 +77,7 @@ POP
 692: 
 R0: 6
 a = 0
+
 def count_down(n):
     a = n - 1
     b = n - 2
@@ -78,9 +86,13 @@ def count_down(n):
     else:
         count_down(n - 1)
 count_down(3)
+
+
 def mult(x, y):
     z = x * y
     return z
+
+
 def main():
     a = 2
     b = 3
