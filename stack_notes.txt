@@ -1,0 +1,88 @@
+Idea: use a stack to store more variables
+- Enables nested function calls
+- Use for storage, to store variables that the registers can't hold
+- Pass variables between functions
+What do we need to make a stack?
+- PUSH
+- POP
+- Storage
+Where to put our stack? memory, RAM
+stack pointer: a memory address that points to the top of our stack (the last thing we put on)
+Where to store?
+- Registers
+- or RAM?
+Stack overflow!!!
+our program overwrote its own code
+Why doesn't the CPU prevent stack overflows?
+- aka, why is the CPU dumb?
+- We don't to add the wires to check
+- We don't want to take the time
+It's the job of the assembly programmer or compiler developer to prevent stack overflows
+Stack underflow!!
+self.ram = [None] * 256
+FF: 00
+FE: 00
+FD: 00
+FC: 00
+FB: 00
+FA: 00
+F9: 00
+F8: 00
+F7: 00
+F6: 00
+F5: 00
+F4: 00
+F3: 84   <-- SP
+F2: 42 
+F1: 00
+C: 3
+B: POP
+A: 3
+09: POP      <--- PC
+08: 2
+07: PUSH
+06: 99
+05: 2
+04: SAVE
+03: 42
+02: PRINT_NUM
+01: PRINT_TIM
+00: PRINT_TIM 
+R0: 00
+R1: 00
+R2: 99
+R3: 42
+R7: F5
+PUSH
+1. Decrement the SP
+2. Get the value from the register specified, and put that value on the stack
+POP
+1. Copy value from last position of stack into the register specified
+2. Increment the SP
+700: 0  (a)
+699: 3  (n)
+698: 2   (a)
+697: 1   (b)
+696: 
+695: 2   (n)
+694: 1   (a)
+693: 0   (b)
+692: 
+R0: 6
+a = 0
+def count_down(n):
+    a = n - 1
+    b = n - 2
+    if n == -1:
+        return
+    else:
+        count_down(n - 1)
+count_down(3)
+def mult(x, y):
+    z = x * y
+    return z
+def main():
+    a = 2
+    b = 3
+    c = main(a, b)
+    d = 99
