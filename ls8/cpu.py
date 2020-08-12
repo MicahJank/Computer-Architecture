@@ -23,7 +23,7 @@ class CPU:
             0b10000010: self.LDI,
             0b01000111: self.PRN,
             0b10100010: self.MUL,
-            0b01000101: self.PUSH,
+            0b01000101: self.PUSH
             0b01000110: self.POP
         }
     
@@ -170,7 +170,7 @@ class CPU:
                 self.alu(IR, operand_a, operand_b)
             else:
                 # What is stored in the branchatable are functions which is why we can invoke this
-                self.branchtable[IR]() 
+                self.branchtable[IR]()
 
             # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
             self.pc += 1 + num_of_ops
