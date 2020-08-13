@@ -1,6 +1,7 @@
 """CPU functionality."""
 
 import sys
+import time
 
 class CPU:
     """Main CPU class."""
@@ -10,6 +11,7 @@ class CPU:
         # pc is the program counter and keeps track of where we are in the 
         self.pc = 0
         self.ram = [0x00] * 0xFF # <-- stores 256 bytes
+        self.running = True
 
         self.reg = [0] * 8 # <-- total of 8 registers
 
@@ -23,14 +25,26 @@ class CPU:
             0b10000010: self.LDI,
             0b01000111: self.PRN,
             0b10100010: self.MUL,
-            0b01000101: self.PUSH
-            0b01000110: self.POP
+            0b01000101: self.PUSH,
+            0b01000110: self.POP,
+            0b00010001: self.RET,
+            0b01010000: self.CALL,
+            0b10100000: self.ADD,
+            0b10000100: self.ST,
         }
     
     # handler functions to store inside the branchtable #
     # HLT exits the program regardless of what is happening
     def HLT(self):
-        sys.exit()
+        self.running = False
+
+    def ST(self):
+        register_a = self.ram_read(self.pc + 1)
+        register_b = self.ram_read(self.pc + 2)
+        b_value = self.reg[register_b]
+        a_address = self.reg[register_a]
+
+        self.ram_write(b_value, a_address)
 
     # takes a value and stores it inside a register
     def LDI(self):
@@ -60,7 +74,31 @@ class CPU:
         reg_num = self.ram_read(self.pc + 1)
         SP = self.reg[7]
         self.reg[reg_num] = self.ram_read(SP)
-        self.reg[7] += 1 
+        self.reg[7] += 1
+
+    def RET(self):
+        SP = self.reg[7]
+        return_address = self.ram_read(SP)
+        self.reg[7] += 1
+
+        self.pc = return_address
+    
+    def CALL(self):
+        # set where we need to return to
+        next_instructions = self.pc + 2
+        self.reg[7] -= 1
+        SP = self.reg[7]
+        # return_address = self.ram_read(self.pc + 2)
+        self.ram_write(next_instructions, SP)
+
+        # set the pc where the function we are calling is
+        reg_num = self.ram_read(self.pc + 1)
+        self.pc = self.reg[reg_num]
+    
+    def ADD(self, register_a, register_b):
+        self.reg[register_a] += self.reg[register_b]
+
+
     #                       #                     #
 
     # returns a location in the ram based on the address passed to it
@@ -152,7 +190,8 @@ class CPU:
         # DDDD - Instruction identifier
         
         # the while loop will run through all the instructions that need to be ran using the pc as a guide for where it is
-        while self.pc <= len(self.ram):
+        while self.running:
+
             IR = self.ram[self.pc] # gets the instruction from the location in the ram
             # bitshift the instruction to the left 6 this will leave me with just the 2 digits left and from that i can
             # find out how many operands will be needed in combinartion with the initial one
@@ -161,19 +200,23 @@ class CPU:
             is_alu_op = IR >> 5 & 0b001 # 0 if false, 1 if true
             pc_set = IR >> 4 & 0b0001 # 1 if instruction sets pc, 0 if it doesnt
 
-            operand_a = self.ram_read(self.pc + 1)
-            operand_b = self.ram_read(self.pc + 2)
 
             # if the operation is an alu operation we should handle it there
             # otherwise we can use the branchtable directly from here
             if is_alu_op:
+                operand_a = self.ram_read(self.pc + 1)
+                operand_b = self.ram_read(self.pc + 2)
                 self.alu(IR, operand_a, operand_b)
             else:
                 # What is stored in the branchatable are functions which is why we can invoke this
-                self.branchtable[IR]()
-
-            # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
-            self.pc += 1 + num_of_ops
+                try:
+                    self.branchtable[IR]()
+                except:
+                    print("opcode: ", bin(self.ram[self.pc]))
+            # some instructions set the pc themself, in those cases we should increment the pc
+            if pc_set == 0:
+                # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
+                self.pc += 1 + num_of_ops
 
 
 
