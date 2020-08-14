@@ -189,9 +189,29 @@ class CPU:
         # C - 1 if this instruction sets the PC
         # DDDD - Instruction identifier
         
+        # set up timer
+        time_start = time.time()
+
         # the while loop will run through all the instructions that need to be ran using the pc as a guide for where it is
         while self.running:
+            # check and see if the IS register is set and interrupts are enabled
+            # if self.reg[6]:
+            #     masked_interrupts = self.reg[5] & self.reg[6]
+            #     interrupt_happened = 0
+            #     for i in range(8):
+            #         interrupt_happened = ((masked_interrupts >> i) & 1) == 1
+            #         if interrupt_happened:
+            #             break
+                
+            #     if interrupt_happened:
+            #         self.reg[6] = 0
 
+
+            # check each to see if a second has elapsed or not
+            if time.time() - time_start >= 1:
+                # set bit 0 of the IS register
+                self.reg[6] = 0b00000001
+                time_start = time.time() # restet the time
             IR = self.ram[self.pc] # gets the instruction from the location in the ram
             # bitshift the instruction to the left 6 this will leave me with just the 2 digits left and from that i can
             # find out how many operands will be needed in combinartion with the initial one
