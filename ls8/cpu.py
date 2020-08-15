@@ -38,7 +38,39 @@ class CPU:
             0b01010100: self.JMP,
             0b01010110: self.JNE,
             0b01010101: self.JEQ,
+            0b10101000 : self.AND,
+            0b10101010 : self.OR,
+            0b01101001 : self.NOT,
+            0b10100100 : self.MOD,
+            0b10101100 : self.SHL,
+            0b10101101 : self.SHR,
+            0b10101011 : self.XOR,
         }
+
+    def XOR(self, regA, regB):
+        self.reg[regA] = self.reg[regA] ^ self.reg[regB]
+
+    def SHR(self, regA, regB):
+        self.reg[regA] = self.reg[regA] >> self.reg[regB]
+
+    def SHL(self, regA, regB):
+        self.reg[regA] = self.reg[regA] << self.reg[regB]
+
+    def MOD(self, regA, regB):
+        if self.reg[regB] == 0:
+            print("ERROR: Cannot divide by 0")
+            self.HLT()
+        else:
+            self.reg[regA] = self.reg[regA] % self.reg[regB] 
+
+    def NOT(self, register, _):
+        self.reg[register] = ~self.reg[register]
+
+    def OR(self, regA, regB):
+        self.reg[regA] = self.reg[regA] | self.reg[regB]
+
+    def AND(self, regA, regB):
+        self.reg[regA] = self.reg[regA] & self.reg[regB]
     
     # handler functions to store inside the branchtable #
     # HLT exits the program regardless of what is happening
