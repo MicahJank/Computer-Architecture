@@ -1,0 +1,49 @@
+ls8 folder contains 3 relevant files for me
+- the examples folder
+- the cpu.py file
+- the ls8.py file
+
+
+- the examples folder
+    - looks like this just contains a bunch of text files showing examples of different cpu instructions for things someone may want to accomplish
+    like keyboard input or printing a string etc.
+
+
+
+
+
+- the cpu.py file
+    - contains a class CPU
+    - the load function for the class seems to have been implemented
+    - the init has nothing in it / unsure if this needs to be filled in with somethign or nothing
+    
+    
+    - the load function
+        - has a list containing program instructions
+        - has an address counter that increments 1 for every instruction in the program list
+        - the function also adds each instruction to a different place in ram using the address counter
+        NOTE - the ram has not been added to the CPU yet...could be something that goes in the init?
+
+
+    - the alu function
+        -  a function that takes in 3 parameters op, reg_a, and reg_b
+        - looks like its purpose is to perform math calculations on something inside the cpu 'reg' property..
+        - self.reg hasnt been defined yet...another thing that may need to go into init?
+        - what does reg stand for?
+            - i believe register
+
+    - the trace function
+        - a prebuilt function that will print out the state of the CPU
+    
+    - the run function
+        - needs to be implemented
+        - should run the CPU
+
+
+
+
+
+- the ls8.py file
+    - basically this file creates the cpu using the cpu.py class and then
+    runs a load function on that cpu
+    finally it runs the cpu
