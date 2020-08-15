@@ -36,6 +36,7 @@ class CPU:
             0b10000100: self.ST,
             0b10100111: self.CMP,
             0b01010100: self.JMP,
+            0b01010110: self.JNE,
         }
     
     # handler functions to store inside the branchtable #
@@ -117,6 +118,11 @@ class CPU:
     def JMP(self):
         register = self.ram_read(self.pc + 1)
         self.pc = self.reg[register]
+    
+    def JNE(self):
+        register = self.ram_read(self.pc + 1)
+        if self.fl & 0b00000000:
+            self.pc = self.reg[register]
 
 
     #                       #                     #
