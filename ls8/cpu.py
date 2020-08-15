@@ -37,6 +37,7 @@ class CPU:
             0b10100111: self.CMP,
             0b01010100: self.JMP,
             0b01010110: self.JNE,
+            0b01010101: self.JEQ,
         }
     
     # handler functions to store inside the branchtable #
@@ -69,12 +70,22 @@ class CPU:
     
     # compares the values in register a with the value in register b
     def CMP(self, register_a, register_b):
+        # print(self.reg[register_a], self.reg[register_b])
         if self.reg[register_a] == self.reg[register_b]:
             self.fl = 0b00000001
-        elif self.reg[register_a] > self.reg[register_b]:
+            return
+        else:
+            self.fl = 0b00000000
+            
+        if self.reg[register_a] > self.reg[register_b]:
             self.fl = 0b00000010
-        elif self.reg[register_a] < self.reg[register_b]:
+            return
+        else:
+            self.fl = 0b00000000
+        
+        if self.reg[register_a] < self.reg[register_b]:
             self.fl = 0b00000100
+            return
         else:
             self.fl = 0b00000000
 
@@ -121,8 +132,18 @@ class CPU:
     
     def JNE(self):
         register = self.ram_read(self.pc + 1)
-        if self.fl & 0b00000000:
+        if self.fl & 0b00000001 == False:
             self.pc = self.reg[register]
+        else:
+            self.pc += 2
+
+    def JEQ(self):
+        register = self.ram_read(self.pc + 1)
+        if self.fl & 0b00000001:
+            self.pc = self.reg[register]
+        else:
+            self.pc += 2
+
 
 
     #                       #                     #
@@ -216,7 +237,7 @@ class CPU:
         # DDDD - Instruction identifier
         
         # set up timer
-        time_start = time.time()
+        # time_start = time.time()
 
         # the while loop will run through all the instructions that need to be ran using the pc as a guide for where it is
         while self.running:
@@ -234,10 +255,11 @@ class CPU:
 
 
             # check each to see if a second has elapsed or not
-            if time.time() - time_start >= 1:
-                # set bit 0 of the IS register
-                self.reg[6] = 0b00000001 
-                time_start = time.time() # restet the time
+            # if time.time() - time_start >= 1:
+            #     # set bit 0 of the IS register
+            #     self.reg[6] = 0b00000001 
+            #     time_start = time.time() # restet the time
+
             IR = self.ram[self.pc] # gets the instruction from the location in the ram
             # bitshift the instruction to the left 6 this will leave me with just the 2 digits left and from that i can
             # find out how many operands will be needed in combinartion with the initial one

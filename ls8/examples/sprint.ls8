@@ -5,30 +5,30 @@
 # 4
 # 5
 
-10000010 # LDI R0,10
+10000010 # LDI R0,10  <--- 10 is stored in register 0
 00000000
 00001010
-10000010 # LDI R1,20
+10000010 # LDI R1,20  <--- 20 is stored in register 1
 00000001
 00010100
-10000010 # LDI R2,TEST1
+10000010 # LDI R2,TEST1 <--- 19 is stored in register 2
 00000010
 00010011
-10100111 # CMP R0,R1
+10100111 # CMP R0,R1   <--- reg0 < reg1 so less than flag set 
 00000000
 00000001
-01010101 # JEQ R2
+01010101 # JEQ R2      <---  equal flag is not set so shouldnt jump
 00000010
-10000010 # LDI R3,1
+10000010 # LDI R3,1    <--- 1 is stored in register 3
 00000011
 00000001
-01000111 # PRN R3
+01000111 # PRN R3      <--- print the number(1) that is in register 3
 00000011
 # TEST1 (address 19):
-10000010 # LDI R2,TEST2
+10000010 # LDI R2,TEST2  <-- register 2 is given the value 32
 00000010
 00100000
-10100111 # CMP R0,R1
+10100111 # CMP R0,R1    <-- reg0 is still < reg1
 00000000
 00000001
 01010110 # JNE R2
