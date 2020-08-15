@@ -18,6 +18,9 @@ class CPU:
         # register 7 is reserved for the stack pointer and the initial place where the SP points is at F4
         self.reg[7] = 0xF4
 
+        # flags register
+        self.fl = 0b00000000
+
         # branchtable provides O(1) access to handler functions - 
         # prevents us from having to check the opcode value against EVERY possible function - (O(n) time complexity)
         self.branchtable = {
@@ -31,6 +34,8 @@ class CPU:
             0b01010000: self.CALL,
             0b10100000: self.ADD,
             0b10000100: self.ST,
+            0b10100111: self.CMP,
+            0b01010100: self.JMP,
         }
     
     # handler functions to store inside the branchtable #
@@ -60,6 +65,17 @@ class CPU:
     # Multiplies to register values together and assigns the result to a register
     def MUL(self, register_a, register_b):
         self.reg[register_a] = self.reg[register_a] * self.reg[register_b]
+    
+    # compares the values in register a with the value in register b
+    def CMP(self, register_a, register_b):
+        if self.reg[register_a] == self.reg[register_b]:
+            self.fl = 0b00000001
+        elif self.reg[register_a] > self.reg[register_b]:
+            self.fl = 0b00000010
+        elif self.reg[register_a] < self.reg[register_b]:
+            self.fl = 0b00000100
+        else:
+            self.fl = 0b00000000
 
     # pushes the value of the given register to the stack
     def PUSH(self):
@@ -97,6 +113,10 @@ class CPU:
     
     def ADD(self, register_a, register_b):
         self.reg[register_a] += self.reg[register_b]
+    
+    def JMP(self):
+        register = self.ram_read(self.pc + 1)
+        self.pc = self.reg[register]
 
 
     #                       #                     #
