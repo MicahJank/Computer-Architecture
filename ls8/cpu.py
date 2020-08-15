@@ -210,7 +210,7 @@ class CPU:
             # check each to see if a second has elapsed or not
             if time.time() - time_start >= 1:
                 # set bit 0 of the IS register
-                self.reg[6] = 0b00000001
+                self.reg[6] = 0b00000001 
                 time_start = time.time() # restet the time
             IR = self.ram[self.pc] # gets the instruction from the location in the ram
             # bitshift the instruction to the left 6 this will leave me with just the 2 digits left and from that i can
