@@ -18,6 +18,9 @@ class CPU:
         # register 7 is reserved for the stack pointer and the initial place where the SP points is at F4
         self.reg[7] = 0xF4
 
+        # flags register
+        self.fl = 0b00000000
+
         # branchtable provides O(1) access to handler functions - 
         # prevents us from having to check the opcode value against EVERY possible function - (O(n) time complexity)
         self.branchtable = {
@@ -31,7 +34,43 @@ class CPU:
             0b01010000: self.CALL,
             0b10100000: self.ADD,
             0b10000100: self.ST,
+            0b10100111: self.CMP,
+            0b01010100: self.JMP,
+            0b01010110: self.JNE,
+            0b01010101: self.JEQ,
+            0b10101000 : self.AND,
+            0b10101010 : self.OR,
+            0b01101001 : self.NOT,
+            0b10100100 : self.MOD,
+            0b10101100 : self.SHL,
+            0b10101101 : self.SHR,
+            0b10101011 : self.XOR,
         }
+
+    def XOR(self, regA, regB):
+        self.reg[regA] = self.reg[regA] ^ self.reg[regB]
+
+    def SHR(self, regA, regB):
+        self.reg[regA] = self.reg[regA] >> self.reg[regB]
+
+    def SHL(self, regA, regB):
+        self.reg[regA] = self.reg[regA] << self.reg[regB]
+
+    def MOD(self, regA, regB):
+        if self.reg[regB] == 0:
+            print("ERROR: Cannot divide by 0")
+            self.HLT()
+        else:
+            self.reg[regA] = self.reg[regA] % self.reg[regB] 
+
+    def NOT(self, register, _):
+        self.reg[register] = ~self.reg[register]
+
+    def OR(self, regA, regB):
+        self.reg[regA] = self.reg[regA] | self.reg[regB]
+
+    def AND(self, regA, regB):
+        self.reg[regA] = self.reg[regA] & self.reg[regB]
     
     # handler functions to store inside the branchtable #
     # HLT exits the program regardless of what is happening
@@ -60,6 +99,27 @@ class CPU:
     # Multiplies to register values together and assigns the result to a register
     def MUL(self, register_a, register_b):
         self.reg[register_a] = self.reg[register_a] * self.reg[register_b]
+    
+    # compares the values in register a with the value in register b
+    def CMP(self, register_a, register_b):
+        # print(self.reg[register_a], self.reg[register_b])
+        if self.reg[register_a] == self.reg[register_b]:
+            self.fl = 0b00000001
+            return
+        else:
+            self.fl = 0b00000000
+            
+        if self.reg[register_a] > self.reg[register_b]:
+            self.fl = 0b00000010
+            return
+        else:
+            self.fl = 0b00000000
+        
+        if self.reg[register_a] < self.reg[register_b]:
+            self.fl = 0b00000100
+            return
+        else:
+            self.fl = 0b00000000
 
     # pushes the value of the given register to the stack
     def PUSH(self):
@@ -97,6 +157,25 @@ class CPU:
     
     def ADD(self, register_a, register_b):
         self.reg[register_a] += self.reg[register_b]
+    
+    def JMP(self):
+        register = self.ram_read(self.pc + 1)
+        self.pc = self.reg[register]
+    
+    def JNE(self):
+        register = self.ram_read(self.pc + 1)
+        if self.fl & 0b00000001 == False:
+            self.pc = self.reg[register]
+        else:
+            self.pc += 2
+
+    def JEQ(self):
+        register = self.ram_read(self.pc + 1)
+        if self.fl & 0b00000001:
+            self.pc = self.reg[register]
+        else:
+            self.pc += 2
+
 
 
     #                       #                     #
@@ -190,7 +269,7 @@ class CPU:
         # DDDD - Instruction identifier
         
         # set up timer
-        time_start = time.time()
+        # time_start = time.time()
 
         # the while loop will run through all the instructions that need to be ran using the pc as a guide for where it is
         while self.running:
@@ -208,10 +287,11 @@ class CPU:
 
 
             # check each to see if a second has elapsed or not
-            if time.time() - time_start >= 1:
-                # set bit 0 of the IS register
-                self.reg[6] = 0b00000001 
-                time_start = time.time() # restet the time
+            # if time.time() - time_start >= 1:
+            #     # set bit 0 of the IS register
+            #     self.reg[6] = 0b00000001 
+            #     time_start = time.time() # restet the time
+
             IR = self.ram[self.pc] # gets the instruction from the location in the ram
             # bitshift the instruction to the left 6 this will leave me with just the 2 digits left and from that i can
             # find out how many operands will be needed in combinartion with the initial one
@@ -229,6 +309,12 @@ class CPU:
                 self.alu(IR, operand_a, operand_b)
             else:
                 # What is stored in the branchatable are functions which is why we can invoke this
+<<<<<<< HEAD
+                self.branchtable[IR]() 
+
+            # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
+            self.pc += 1 + num_of_ops 
+=======
                 try:
                     self.branchtable[IR]()
                 except:
@@ -237,6 +323,7 @@ class CPU:
             if pc_set == 0:
                 # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
                 self.pc += 1 + num_of_ops
+>>>>>>> 067dadd85b590d29e2e03f49af9ea38df468a85a
 
 
 
