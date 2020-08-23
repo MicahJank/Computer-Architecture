@@ -154,7 +154,7 @@ class CPU:
                 self.branchtable[IR]() 
 
             # pc needs to increment by 1 (for the current operation) + however many extra operands there will be
-            self.pc += 1 + num_of_ops
+            self.pc += 1 + num_of_ops 
 
 
 
